@@ -1,0 +1,215 @@
+// AdminDashboard.jsx
+import React, { useState, useEffect } from 'react';
+import { FileText, Users, CheckCircle, XCircle, Truck, ArrowLeftCircle } from 'lucide-react';
+import DashboardStats from '../components/DashboardStats';
+import SearchBar from '../components/SearchBar';
+import LoadingSpinner from '../components/LoadingSpinner';
+import Alert from '../components/Alert';
+import Pagination from '../components/Pagination';
+import RequestModal from '../components/RequestModal';
+import DateRangeFilter from '../components/DateRangeFilter';
+import { Link } from 'react-router-dom';
+import { format } from 'date-fns';
+import axios from 'axios';
+
+const AdminDashboard = () => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [alert, setAlert] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [requests, setRequests] = useState([]);
+    const [selectedRequest, setSelectedRequest] = useState(null);
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+
+    useEffect(() => {
+        fetchRequests();
+    }, []);
+
+    const fetchRequests = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        try {
+            const response = await axios.get('http://localhost:5000/api/requests', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            const sortedRequests = response.data.sort((a, b) => new Date(b.returnDate) - new Date(a.returnDate));
+            setRequests(sortedRequests);
+        } catch (error) {
+            setAlert({ type: 'error', message: 'Failed to fetch requests' });
+        }
+    };
+
+    const handleStatusChange = async (id, newStatus) => {
+        setIsLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            await axios.patch(`http://localhost:5000/api/requests/${id}`, { status: newStatus }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            setAlert({ type: 'success', message: `Status updated to ${newStatus}` });
+            fetchRequests();
+        } catch (error) {
+            setAlert({ type: 'error', message: 'Failed to update status' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const statusReturned = async (id, newStatus) => {
+        setIsLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            await axios.patch(`http://localhost:5000/api/requests/returned/${id}`, { status: newStatus }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            setAlert({ type: 'success', message: `Status updated to ${newStatus}` });
+            fetchRequests();
+        } catch (error) {
+            setAlert({ type: 'error', message: 'Failed to update status' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const statusDispatched = async (id, newStatus) => {
+        setIsLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            await axios.patch(`http://localhost:5000/api/requests/dispatched/${id}`, { status: newStatus }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            setAlert({ type: 'success', message: `Status updated to ${newStatus}` });
+            fetchRequests();
+        } catch (error) {
+            setAlert({ type: 'error', message: 'Failed to update status' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const ITEMS_PER_PAGE = 10;
+
+    const filteredRequests = requests.filter(request => {
+        const matchesSearch =
+            (request.officerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                request.documentTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                request.email?.toLowerCase().includes(searchTerm.toLowerCase()));
+
+        const requestDate = new Date(request.returnDate);
+        const isWithinDateRange =
+            (!startDate || requestDate >= new Date(startDate)) &&
+            (!endDate || requestDate <= new Date(endDate));
+
+        return matchesSearch && isWithinDateRange;
+    });
+
+    const paginatedRequests = filteredRequests.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+    return (
+        <div className="container mx-auto px-4 py-8">
+            {alert && <Alert type={alert.type} message={alert.message} onClose={() => setAlert(null)} />}
+
+            <div className="mb-8">
+                <h2 className="text-2xl font-bold mb-6">Dashboard Overview</h2>
+                <DashboardStats
+                    stats={[
+                        { title: 'Total Requests', value: requests.length, icon: FileText },
+                        { title: 'Pending Requests', value: requests.filter(r => r.status === 'pending').length, icon: Users },
+                        { title: 'Approved', value: requests.filter(r => r.status === 'approved').length, icon: CheckCircle },
+                        { title: 'Rejected', value: requests.filter(r => r.status === 'rejected').length, icon: XCircle },
+                        { title: 'Dispatched', value: requests.filter(r => r.status === 'dispatched').length, icon: Truck},
+                        { title: 'Returned', value: requests.filter(r => r.status === 'returned').length, icon: ArrowLeftCircle }
+                    
+                    ]}
+                />
+            </div>
+
+            <div className="mb-4">
+                <Link to="/admin/audit-logs" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    View Audit Logs
+                </Link>
+            </div>
+
+            <div className="bg-white rounded-lg shadow p-6">
+                <div className="space-y-4 mb-6">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-bold">File Access Requests</h2>
+                        <SearchBar onSearch={setSearchTerm} />
+                    </div>
+                    <DateRangeFilter
+                        startDate={startDate}
+                        endDate={endDate}
+                        onStartDateChange={setStartDate}
+                        onEndDateChange={setEndDate}
+                    />
+                </div>
+
+                {isLoading ? <LoadingSpinner /> : (
+                    <div className="flex flex-col space-y-4">
+                        {paginatedRequests.map((request, index) => (
+                            <div
+                                key={request._id}
+                                className="border p-4 rounded-lg hover:bg-gray-100 flex justify-between items-center cursor-pointer"
+                                onClick={() => setSelectedRequest(request)}
+                            >
+                                <div className="flex-1">
+                                    <span className="font-bold">
+                                        {index + 1}. {format(new Date(request.returnDate), 'dd MMMM, yyyy')}
+                                    </span>
+                                    <span className={`ml-2 px-2 py-1 rounded text-sm ${
+                                        request.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                            request.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                                                'bg-yellow-100 text-yellow-800'
+                                    }`}>
+                                        {request.status}
+                                    </span>
+                                    <div className="mt-2">
+                                        <p>Officer: {request.officerName}</p>
+                                        <p>Supervisor: {request.supervisorName}</p>
+                                        <p>Email: {request.email}</p>
+                                    </div>
+                                </div>
+
+                                <select
+                                    value={request.status}
+                                    onClick={(e) => e.stopPropagation()}
+                                    onChange={(e) => {
+                                        const selectedValue = e.target.value;
+                                        if (selectedValue === "returned") {
+                                            statusReturned(request._id, selectedValue);
+                                        } else if (selectedValue === "dispatched") {
+                                            statusDispatched(request._id, selectedValue);
+                                        } else {
+                                            handleStatusChange(request._id, selectedValue);
+                                        }
+                                    }}
+                                    className="p-2 border rounded"
+                                >
+                                    <option value="requested">Requested</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="rejected">Rejected</option>
+                                    <option value="dispatched">Dispatched</option>
+                                    <option value="returned">Returned</option>
+                                </select>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                <Pagination currentPage={currentPage} totalPages={Math.ceil(filteredRequests.length / ITEMS_PER_PAGE)} onPageChange={setCurrentPage} />
+            </div>
+
+            {selectedRequest && (
+                <RequestModal request={selectedRequest} onClose={() => setSelectedRequest(null)} />
+            )}
+        </div>
+    );
+};
+
+export default AdminDashboard;
