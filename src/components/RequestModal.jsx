@@ -14,7 +14,7 @@ const RequestModal = ({ request, onClose }) => {
     return (
         <div 
             id="modal-overlay"
-            className="fixed inset-0  bg-gradient-to-br from-yellow-500 via-black to-white bg-opacity-0 flex justify-center items-center z-50"
+            className="fixed inset-0  bg-gradient-to-br from-yellow-500 via-black to-white bg-opacity-90 flex justify-center items-center z-50"
             onClick={handleOverlayClick}
         >
             <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
@@ -32,10 +32,10 @@ const RequestModal = ({ request, onClose }) => {
                     <p><strong>Department:</strong> {request.department}</p>
                     <p><strong>Supervisor Name:</strong> {request.supervisorName}</p>
                     <p><strong>Document Title:</strong> {request.documentTitle}</p>
-                    <p><strong>File Reference:</strong> {request.fileReference}</p>
+                    <p><strong>File Reference:</strong> {request.documentReference}</p>
                     <p><strong>File Date:</strong> {format(new Date(request.fileDate), 'dd MMM yyyy')}</p>
                     <p><strong>Purpose of Request:</strong> {request.purpose}</p>
-                    <p><strong>Telephone:</strong> {request.telephone}</p>
+                    <p><strong>Telephone:</strong> +233{request.phoneNumber}</p>
                     <p><strong>Date of Request:</strong> {format(new Date(request.returnDate), 'dd MMM yyyy')}</p>
                     <p>
                         <strong>Status:</strong>

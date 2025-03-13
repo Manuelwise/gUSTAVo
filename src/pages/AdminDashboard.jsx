@@ -11,6 +11,8 @@ import DateRangeFilter from '../components/DateRangeFilter';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import axios from 'axios';
+import featureImage from '../assets/image/dashboard2.webp';
+
 
 const AdminDashboard = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -21,10 +23,6 @@ const AdminDashboard = () => {
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
-
-    useEffect(() => {
-        fetchRequests();
-    }, []);
 
     const fetchRequests = async () => {
         const token = localStorage.getItem('token');
@@ -41,6 +39,10 @@ const AdminDashboard = () => {
             setAlert({ type: 'error', message: 'Failed to fetch requests' });
         }
     };
+
+    useEffect(() => {
+        fetchRequests();
+    }, []);
 
     const handleStatusChange = async (id, newStatus) => {
         setIsLoading(true);
@@ -85,7 +87,7 @@ const AdminDashboard = () => {
             });
 
             setAlert({ type: 'success', message: `Status updated to ${newStatus}` });
-            fetchRequests();
+            fetchRequests();    
         } catch (error) {
             setAlert({ type: 'error', message: 'Failed to update status' });
         } finally {
@@ -93,7 +95,7 @@ const AdminDashboard = () => {
         }
     };
 
-    const ITEMS_PER_PAGE = 10;
+    const ITEMS_PER_PAGE = 3;
 
     const filteredRequests = requests.filter(request => {
         const matchesSearch =
@@ -112,11 +114,22 @@ const AdminDashboard = () => {
     const paginatedRequests = filteredRequests.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
     return (
+        <div
+        className="bg-cover bg-center"
+        style={{
+            backgroundImage: `url(${featureImage})`,
+            backgroundSize: 'cover', // Ensures the whole image fits inside the div
+            backgroundPosition: 'center', // Centers the image within the div
+            backgroundRepeat: 'no-repeat', // Prevents tiling if the image is smaller than the div
+            opacity: 0.9,
+            // height: '    calc(100vh - 100px)', // Adjust this value based on your navbar and footer height
+        }}
+    >
         <div className="container mx-auto px-4 py-8">
             {alert && <Alert type={alert.type} message={alert.message} onClose={() => setAlert(null)} />}
 
             <div className="mb-8">
-                <h2 className="text-2xl font-bold mb-6">Dashboard Overview</h2>
+                <h2 className="text-4xl font-bold mb-6">Dashboard Overview</h2>
                 <DashboardStats
                     stats={[
                         { title: 'Total Requests', value: requests.length, icon: FileText },
@@ -131,7 +144,7 @@ const AdminDashboard = () => {
             </div>
 
             <div className="mb-4">
-                <Link to="/admin/audit-logs" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                <Link to="/admin/users" className="bg-yellow-400 text-white px-4 py-2 rounded hover:bg-blue-700">
                     View Audit Logs
                 </Link>
             </div>
@@ -155,7 +168,7 @@ const AdminDashboard = () => {
                         {paginatedRequests.map((request, index) => (
                             <div
                                 key={request._id}
-                                className="border p-4 rounded-lg hover:bg-gray-100 flex justify-between items-center cursor-pointer"
+                                className="border p-4 rounded-lg hover:bg-gray-100 transition duration-300 ease-in-out transform hover:scale-105 flex justify-between items-center cursor-pointer"
                                 onClick={() => setSelectedRequest(request)}
                             >
                                 <div className="flex-1">
@@ -209,6 +222,7 @@ const AdminDashboard = () => {
                 <RequestModal request={selectedRequest} onClose={() => setSelectedRequest(null)} />
             )}
         </div>
+    </div>
     );
 };
 

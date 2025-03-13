@@ -20,15 +20,22 @@ const NewUserAdmin = () => {
         reset,
         formState: { errors }
     } = useForm();
+    
+    const [showPassword, setShowPassword] = useState(false); // State to manage password visibility
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword); // Toggle the visibility state
+    };
 
     const onSubmit = async (data) => {
         if (!isAuthenticated) {
             navigate('/login');
+            return; // Prevent form submission if not authenticated
         }
         setIsSubmitting(true);
-
+    
         const token = localStorage.getItem('token');
-
+    
         try {
             const response = await axios.post('http://localhost:5000/api/auth/admin', data, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -41,6 +48,7 @@ const NewUserAdmin = () => {
         } catch (error) {
             setSubmitStatus('error');
             console.error(error);
+            // Optionally, you can set specific error messages based on error.response
         } finally {
             setIsSubmitting(false);
         }
@@ -66,10 +74,8 @@ const NewUserAdmin = () => {
                         <label className="block mb-1">Email *</label>
                         <input
                             {...register('email', { required: 'This field is required', 
-                                pattern: {
-                                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                    message: 'Invalid email address'
-                                }
+                                pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, 
+                                message: 'Invalid email address' }
                             })}
                             className="w-full p-2 border rounded"
                         />
@@ -84,8 +90,16 @@ const NewUserAdmin = () => {
                             {...register('password', {
                                 required: 'Password is required'
                             })}
+                            type={showPassword ? 'text' : 'password'}
                             className="w-full p-2 border rounded"
                         />
+                         <button
+                                type="button"
+                                onClick={togglePasswordVisibility}
+                                className="ml-2 text-blue-600"
+                            >
+                                {showPassword ? 'Hide' : 'Show'}
+                            </button>
                         {errors.password && (
                             <span className="text-red-500 text-sm">{errors.password.message}</span>
                         )}

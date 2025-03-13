@@ -1,4 +1,3 @@
-// context/AuthContext.jsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 
@@ -7,7 +6,10 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(localStorage.getItem('token'));
     const [username, setUsername] = useState(localStorage.getItem('username'));
-    const [requests, setRequests] = useState([]);
+    const [notifications, setNotifications] = useState([]);
+    // const [loading, setLoading] = useState(true);
+    // const [error, setError] = useState(null);
+
 
     const isAuthenticated = !!token;
 
@@ -15,22 +17,38 @@ export const AuthProvider = ({ children }) => {
     const login = async (credentials) => {
         try {
             const response = await axios.post('http://localhost:5000/api/auth/login', credentials);
-            const { token, user} = response.data;
-
+            const { token, user } = response.data;
+    
             localStorage.setItem('token', token);
             localStorage.setItem('username', user.username);
-
+    
             setToken(token);
             setUsername(user.username);
-            console.log('Fetched username:',user.username);
-            console.log('Fetched login data:',response.data);
-            fetchRequests(token);  // Fetch immediately after login
+            console.log('Fetched username:', user.username);
+            console.log('Fetched login data:', response.data);
+            
+            // Fetch requests and notifications immediately after login
+            // fetchRequests(token);  
+            await fetchNotifications(); // Fetch notifications after login
+    
             return true;
         } catch (error) {
             console.error('Login failed:', error);
             return false;
         }
     };
+    
+const fetchNotifications = async () => {
+    if (!token) return; // Check if token is available
+    try {
+        const response = await axios.get('http://localhost:5000/api/notifications', {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        setNotifications(response.data);
+    } catch (err) {
+        console.error('Failed to fetch notifications:', err);
+    }
+};
 
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
@@ -45,38 +63,41 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('username');
         setToken(null);
         setUsername(null);
-        setRequests([]);
+        setNotifications([]);
     };
 
     // Fetch only pending requests
-    const fetchRequests = async (overrideToken = null) => {
-        const activeToken = overrideToken || token;
-        if (!activeToken) return;
+// const [fetching, setFetching] = useState(false);
 
-        try {
-            const response = await axios.get('http://localhost:5000/api/requests', {
-                headers: { Authorization: `Bearer ${activeToken}` },
-            });
+// const fetchRequests = async (overrideToken = null) => {
+//     const activeToken = overrideToken || token;
+//     if (!activeToken || fetching) return; // Prevent fetching if already fetching
 
-            const pendingRequests = response.data.filter(request => request.status === 'pending');
-            setRequests(pendingRequests);
-        } catch (error) {
-            console.error('Failed to fetch requests:', error);
-        }
-    };
+//     setFetching(true); // Set fetching to true
+//     try {
+//         const response = await axios.get('http://localhost:5000/api/requests', {
+//             headers: { Authorization: `Bearer ${activeToken}` },
+//         });
+//         const pendingRequests = response.data.filter(request => request.status === 'pending');
+//         setRequests(pendingRequests);
+//     } catch (error) {
+//         console.error('Failed to fetch requests:', error);
+//     } finally {
+//         setFetching(false); // Reset fetching state
+//     }
+// };
 
     // Auto-fetch requests on login and refresh every 30 seconds
-    useEffect(() => {
-        if (token) {
-            fetchRequests();
-
-            const interval = setInterval(fetchRequests, 30000);  // Every 30 seconds
-            return () => clearInterval(interval);
-        }
-    }, [token]);
+//   useEffect(() => {
+//       if (token) {
+//           fetchRequests();
+//           const interval = setInterval(fetchRequests, 30000); // Every 30 seconds
+//           return () => clearInterval(interval); // Clear interval on unmount
+//       }
+//   }, [token]);
 
     return (
-        <AuthContext.Provider value={{ token, isAuthenticated, username, requests, fetchRequests, login, logout }}>
+        <AuthContext.Provider value={{ token, isAuthenticated, username, notifications, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

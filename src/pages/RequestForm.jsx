@@ -48,7 +48,7 @@ const RequestForm = () => {
     { value: '11', label: 'November' }, { value: '12', label: 'December' }
   ];
 
-  const years = Array.from({ length: 10 }, (_, i) => ({
+  const years = Array.from({ length: 70 }, (_, i) => ({
     value: new Date().getFullYear() - i,
     label: new Date().getFullYear() - i
   }));
@@ -71,7 +71,8 @@ const RequestForm = () => {
               type="email"
               {...register('email', {
                 required: 'This field is required',
-                pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: 'Invalid email address' }
+                pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, 
+                  message: 'Invalid email address' }
               })}
               className="w-full p-2 border rounded"
             />
@@ -101,14 +102,16 @@ const RequestForm = () => {
           </div>
 
           <div>
-            <label className="block mb-1">Document Reference</label>
+            <label className="block mb-1">Document Reference/ Additional Info</label>
             <textarea {...register('documentReference')} className="w-full p-2 border rounded h-32" />
           </div>
 
           <div>
             <label className="block mb-1">File Date *</label>
             <div className="flex space-x-2">
-              <select {...register('fileMonth', { required: 'Month is required' })} className="w-1/2 p-2 border rounded">
+              <select {...register('fileMonth' 
+                // ,{ required: 'Month is required' }
+  )} className="w-1/2 p-2 border rounded">
                 <option value="">Month</option>
                 {months.map(month => <option key={month.value} value={month.value}>{month.label}</option>)}
               </select>
@@ -159,8 +162,19 @@ const RequestForm = () => {
               <p><strong>File Date:</strong> {formData.fileMonth}/{formData.fileYear}</p>
               <p><strong>Telephone Number:</strong> +233{formData.phoneNumber}</p>
             </div>
-            <button onClick={confirmSubmit} className="bg-green-600 text-white px-4 py-2 rounded">Yes, Submit</button>
-            <button onClick={() => setIsConfirming(false)} className="bg-red-600 text-white px-4 py-2 rounded ml-2">Cancel</button>
+            <button 
+                onClick={confirmSubmit} 
+                className={`bg-green-600 text-white px-4 py-2 rounded ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`} 
+                disabled={isSubmitting}
+            >
+                {isSubmitting ? 'Submitting...' : 'Yes, Submit'}
+            </button>
+            <button 
+                onClick={() => setIsConfirming(false)} 
+                className="bg-red-600 text-white px-4 py-2 rounded ml-2"
+            >
+                Cancel
+            </button>
           </div>
         </div>
       )}

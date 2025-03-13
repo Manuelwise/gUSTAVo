@@ -20,9 +20,9 @@ const HomePage = () => {
       {/* Hero Section */}
       <div 
     className=" text-black py-20 min-h-[400px] flex items-center justify-center"
->
+      >
 <div
-    className="absolute inset-1 bg-cover bg-center rounded-md"
+    className="absolute inset-1 bg-cover bg-center px-0"
     style={{backgroundImage: `url(${featureImage})`,
     backgroundSize: 'cover', // Ensures the whole image fits inside the div
     backgroundPosition: 'center', // Centers the image within the div

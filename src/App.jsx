@@ -1,3 +1,4 @@
+import { AuthProvider } from './context/AuthContext';
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -6,20 +7,21 @@ import HomePage from './pages/HomePage';
 import RequestForm from './pages/RequestForm';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
-import { AuthProvider } from './context/AuthContext';
+
 import ProtectedRoute from './components/ProtectedRoute';
 import NewUserAdmin from './pages/NewUserAdmin';
-import AuditLogs from './pages/AuditLogs'; // Add this import
-
+import AuditLogs from './pages/AuditLogs';  
+import UsersGrid from './pages/UsersGrid';
+import { UserProvider } from './context/UserContext';
 
 const App = () => {
   return (
     <AuthProvider>
-       
-      <Router>
-        <div className="min-h-screen flex flex-col">
-          <Navbar />
-          <main className="flex-grow">
+      <UserProvider>
+        <Router>
+          <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <main className="flex-grow">
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/request" element={<RequestForm />} />
@@ -45,12 +47,18 @@ const App = () => {
                   <NewUserAdmin />
                 </ProtectedRoute>
               } />
+              <Route path="/admin/users" 
+              element={
+                <ProtectedRoute>
+                  <UsersGrid />
+                </ProtectedRoute>
+              } />
             </Routes>
           </main>
           <Footer />
         </div>
       </Router>
-      
+      </UserProvider>
     </AuthProvider>
   );
 };
