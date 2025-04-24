@@ -31,7 +31,7 @@ const HomePage = () => {
   }}></div>
     <div className="relative container mx-auto text-center bg-white/40 rounded-lg max-w-[700px]">
         <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            GNPC Records & Archives Portal
+            Document Retrieval System (DoRS) Portal
         </h1>
         <p className="text-xl mb-8 max-w-2xl mx-auto">
             Access and manage organizational documents efficiently through our
@@ -73,7 +73,7 @@ const HomePage = () => {
       <div className="py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">
-            How It Works
+            How DoRS Works
           </h2>
           <div className="max-w-3xl mx-auto">
             <div className="space-y-8">

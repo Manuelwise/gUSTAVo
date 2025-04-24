@@ -33,15 +33,21 @@ const RequestModal = ({ request, onClose }) => {
                     <p><strong>Supervisor Name:</strong> {request.supervisorName}</p>
                     <p><strong>Document Title:</strong> {request.documentTitle}</p>
                     <p><strong>File Reference:</strong> {request.documentReference}</p>
-                    <p><strong>File Date:</strong> {format(new Date(request.fileDate), 'dd MMM yyyy')}</p>
-                    <p><strong>Purpose of Request:</strong> {request.purpose}</p>
-                    <p><strong>Telephone:</strong> +233{request.phoneNumber}</p>
+                    <p><strong>File Date Range</strong></p>
+                    <p><strong>From:</strong> {format(new Date(request.fromDate), 'dd MMM yyyy')}</p>
+                    <p><strong>To:</strong> {format(new Date(request.toDate), 'dd MMM yyyy')}</p>
+                    <p><strong>Document Type:</strong> {request.documentType}</p>
+                    <p><strong>Corporate Contact:</strong> +233{request.corporateNumber}</p>
+                    <p><strong>Personal Contact:</strong> +233{request.personalNumber}</p>
                     <p><strong>Date of Request:</strong> {format(new Date(request.returnDate), 'dd MMM yyyy')}</p>
+                    <p><strong>Document Delivery Status:</strong> {request.deliveryStatus}</p>
                     <p>
                         <strong>Status:</strong>
                         <span className={`ml-2 px-2 py-1 rounded ${
                             request.status === 'approved' ? 'bg-green-100 text-green-800' :
                             request.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                            request.status === 'dispatched' ? 'bg-blue-100 text-blue-800' :
+                            request.status === 'returned' ? 'bg-purple-100 text-purple-800' :
                             'bg-yellow-100 text-yellow-800'
                         }`}>
                             {request.status}

@@ -52,10 +52,11 @@ const UsersGrid = () => {
             }}
         >
             <div className="container mx-6 h-auto px-1 py-8 relative">
-                <h2 className="text-5xl font-bold mb-4 text-center">Welcome To the Activity Page</h2>
+                <h2 className="text-5xl font-bold mb-4 text-center align-middle">Welcome To DoRS Admin Page</h2>
                 <h2 className="text-2xl font-bold mb-4">Admins</h2>
                 <div className="mb-4">
                     <span className="text-gray-100 mb-4">Search for an admin by username</span>
+                    <span className="text-gray-100 mb-4">Track the activities of the admins</span>
                 </div>
                 <input
                     type="text"

@@ -49,6 +49,7 @@ const NewUserAdmin = () => {
             setSubmitStatus('error');
             console.error(error);
             // Optionally, you can set specific error messages based on error.response
+            errors.message = error.response?.data?.message || 'An error occurred. Please try again.';
         } finally {
             setIsSubmitting(false);
         }
@@ -136,7 +137,7 @@ const NewUserAdmin = () => {
 
                     {submitStatus === 'error' && (
                         <div className="text-red-600 text-center">
-                            An error occurred. Please try again.
+                            {errors.message || 'An error occurred. Please try again.'}
                         </div>
                     )}
                 </form>

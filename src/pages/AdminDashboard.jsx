@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import axios from 'axios';
 import featureImage from '../assets/image/dashboard2.webp';
-
+import StatusChangeModal from '../components/StatusChangeModal';
 
 const AdminDashboard = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +23,10 @@ const AdminDashboard = () => {
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [showStatusModal, setShowStatusModal] = useState(false);
+    const [pendingStatusChange, setPendingStatusChange] = useState(null); // { id, newStatus }
+    
+
 
     const fetchRequests = async () => {
         const token = localStorage.getItem('token');
@@ -44,22 +48,27 @@ const AdminDashboard = () => {
         fetchRequests();
     }, []);
 
-    const handleStatusChange = async (id, newStatus) => {
+    const handleStatusModalSubmit = async ({ id, status, additionalInfo, reasonForRejection }) => {
         setIsLoading(true);
         try {
-            const token = localStorage.getItem('token');
-            await axios.patch(`http://localhost:5000/api/requests/${id}`, { status: newStatus }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            setAlert({ type: 'success', message: `Status updated to ${newStatus}` });
-            fetchRequests();
+          const token = localStorage.getItem('token');
+          await axios.patch(
+            `http://localhost:5000/api/requests/${id}`,
+            { status, additionalInfo, reasonForRejection },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+      
+          setAlert({ type: 'success', message: `Status updated to ${status}` });
+          fetchRequests();
         } catch (error) {
-            setAlert({ type: 'error', message: 'Failed to update status' });
+          setAlert({ type: 'error', message: 'Failed to update status' });
         } finally {
-            setIsLoading(false);
+          setIsLoading(false);
         }
-    };
+      };
+      
 
     const statusReturned = async (id, newStatus) => {
         setIsLoading(true);
@@ -129,17 +138,16 @@ const AdminDashboard = () => {
             {alert && <Alert type={alert.type} message={alert.message} onClose={() => setAlert(null)} />}
 
             <div className="mb-8">
-                <h2 className="text-4xl font-bold mb-6">Dashboard Overview</h2>
+                <h2 className="text-4xl font-bold mb-6">DoRS Dashboard</h2>
                 <DashboardStats
-                    stats={[
-                        { title: 'Total Requests', value: requests.length, icon: FileText },
-                        { title: 'Pending Requests', value: requests.filter(r => r.status === 'pending').length, icon: Users },
-                        { title: 'Approved', value: requests.filter(r => r.status === 'approved').length, icon: CheckCircle },
-                        { title: 'Rejected', value: requests.filter(r => r.status === 'rejected').length, icon: XCircle },
-                        { title: 'Dispatched', value: requests.filter(r => r.status === 'dispatched').length, icon: Truck},
-                        { title: 'Returned', value: requests.filter(r => r.status === 'returned').length, icon: ArrowLeftCircle }
-                    
-                    ]}
+                 stats={[
+                    { title: 'Total Requests', value: requests.length, icon: FileText, link: '/admin/reports' },
+                    { title: 'Pending Requests', value: requests.filter(r => r.status === 'pending').length, icon: Users },
+                    { title: 'Approved', value: requests.filter(r => r.status === 'approved').length, icon: CheckCircle },
+                    { title: 'Rejected', value: requests.filter(r => r.status === 'rejected').length, icon: XCircle },
+                    { title: 'Dispatched', value: requests.filter(r => r.status === 'dispatched').length, icon: Truck },
+                    { title: 'Returned', value: requests.filter(r => r.status === 'returned').length, icon: ArrowLeftCircle }
+                  ]}
                 />
             </div>
 
@@ -177,6 +185,8 @@ const AdminDashboard = () => {
                                     </span>
                                     <span className={`ml-2 px-2 py-1 rounded text-sm ${
                                         request.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                        request.status === 'dispatched' ? 'bg-blue-100 text-blue-800' :
+                                        request.status === 'returned' ? 'bg-purple-100 text-purple-800' :
                                             request.status === 'rejected' ? 'bg-red-100 text-red-800' :
                                                 'bg-yellow-100 text-yellow-800'
                                     }`}>
@@ -194,21 +204,25 @@ const AdminDashboard = () => {
                                     onClick={(e) => e.stopPropagation()}
                                     onChange={(e) => {
                                         const selectedValue = e.target.value;
-                                        if (selectedValue === "returned") {
+                                    
+                                        if (selectedValue === 'approved' || selectedValue === 'rejected') {
+                                            setPendingStatusChange({ id: request._id, newStatus: selectedValue });
+                                            setShowStatusModal(true);
+                                        } else if (selectedValue === 'returned') {
                                             statusReturned(request._id, selectedValue);
-                                        } else if (selectedValue === "dispatched") {
+                                        } else if (selectedValue === 'dispatched') {
                                             statusDispatched(request._id, selectedValue);
                                         } else {
                                             handleStatusChange(request._id, selectedValue);
                                         }
-                                    }}
+                                    }}                                    
                                     className="p-2 border rounded"
                                 >
-                                    <option value="requested">Requested</option>
-                                    <option value="approved">Approved</option>
-                                    <option value="rejected">Rejected</option>
-                                    <option value="dispatched">Dispatched</option>
-                                    <option value="returned">Returned</option>
+                                    <option value="requested">Request</option>
+                                    <option value="approved">Approve</option>
+                                    <option value="rejected">Reject</option>
+                                    <option value="dispatched">Dispatch</option>
+                                    <option value="returned">Return</option>
                                 </select>
                             </div>
                         ))}
@@ -221,6 +235,14 @@ const AdminDashboard = () => {
             {selectedRequest && (
                 <RequestModal request={selectedRequest} onClose={() => setSelectedRequest(null)} />
             )}
+            {showStatusModal && pendingStatusChange && (
+            <StatusChangeModal
+                id={pendingStatusChange.id}
+                status={pendingStatusChange.newStatus}
+                onSubmit={handleStatusModalSubmit}
+                onClose={() => setShowStatusModal(false)}
+            />
+            )}  
         </div>
     </div>
     );

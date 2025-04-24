@@ -13,32 +13,43 @@ const RequestForm = () => {
     handleSubmit,
     reset,
     formState: { errors }
-  } = useForm();
-
+  } = useForm({ });
+ 
   const onSubmit = (data) => {
-    const fileDate = `${data.fileYear}-${data.fileMonth}-01`;
-    const finalData = { ...data, fileDate };
-    setFormData(finalData); // Store for confirmation display
-    setIsConfirming(true);  // Show confirmation modal
+    if (!data.fromMonth || !data.fromYear || !data.toMonth || !data.toYear) {
+      setSubmitStatus('error');
+      alert('Please select both month and year for From and To dates.');
+      return;
+    }
+    const fromDate = `${data.fromYear}-${data.fromMonth}-01`;
+    const toDate = `${data.toYear}-${data.toMonth}-01`;
+    const finalData = { ...data, fromDate, toDate};
+    setFormData(finalData); 
+    setIsConfirming(true);  
   };
+
+  console.log("formData:",formData);
+  
 
   const confirmSubmit = async () => {
     setIsSubmitting(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/requests/request', formData);
-      console.log(response.data);
-      setSubmitStatus('success');
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      reset();
+        const response = await axios.post('http://localhost:5000/api/requests/request', formData);
+        console.log(response.data);
+        setSubmitStatus('success');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        reset();
     } catch (error) {
-      setSubmitStatus('error');
-      console.error(error);
+        setSubmitStatus('error');
+        console.error(error);
     } finally {
-      setIsSubmitting(false);
-      setIsConfirming(false);  // Close confirmation modal
+        setIsSubmitting(false);
+        setIsConfirming(false);
     }
-  };
+};
 
+  
+  
   const months = [
     { value: '01', label: 'January' }, { value: '02', label: 'February' },
     { value: '03', label: 'March' }, { value: '04', label: 'April' },
@@ -90,7 +101,16 @@ const RequestForm = () => {
             <select {...register('department', { required: 'This field is required' })} className="w-full p-2 border rounded">
               <option value="">Select Department</option>
               <option value="R&D">R&D</option>
-              <option value="FINANCE">FINANCE</option>
+              <option value="WORKS">Works</option>
+              <option value="FINANCE">Finance</option>
+              <option value="HUMAN RESOURCES">Human Resources</option>
+              <option value="IT">IT</option>
+              <option value="GEOLOGY">Geology</option>
+              <option value="GEOPHYSICS">Geophysics</option>
+              <option value="LEGAL">Legal</option>
+              <option value="ENGINEERING">Engineering</option>
+              <option value="CORPORATE FINANCE">Corporate Finance</option>
+              <option value="SAFETY">Safety</option>
             </select>
             {errors.department && <span className="text-red-500 text-sm">{errors.department.message}</span>}
           </div>
@@ -106,28 +126,54 @@ const RequestForm = () => {
             <textarea {...register('documentReference')} className="w-full p-2 border rounded h-32" />
           </div>
 
+         <div>
+             <label className="block mb-1">Document Type *</label>
+             <select 
+              {...register('documentType', { required: 'This field is required' })} 
+              className="w-full p-2 border rounded"
+            >
+                 <option value="">Select Document Type</option>
+                 <option value="original">Original Document</option>
+                 <option value="scanned">Scanned Copy</option>
+                 <option value="photocopy">Photocopy</option>
+             </select>
+             {errors.documentType && <span className="text-red-500 text-sm">{errors.documentType.message}</span>}
+         </div>
+
           <div>
-            <label className="block mb-1">File Date *</label>
-            <div className="flex space-x-2">
-              <select {...register('fileMonth' 
-                // ,{ required: 'Month is required' }
-  )} className="w-1/2 p-2 border rounded">
-                <option value="">Month</option>
-                {months.map(month => <option key={month.value} value={month.value}>{month.label}</option>)}
-              </select>
-              <select {...register('fileYear', { required: 'Year is required' })} className="w-1/2 p-2 border rounded">
-                <option value="">Year</option>
-                {years.map(year => <option key={year.value} value={year.value}>{year.label}</option>)}
-              </select>
+            {/* <label className="block mb-1">File Date *</label> */}
+            <div className="space-y-2">
+              <div className="flex space-x-2">
+                <label className="block mb-1 w-10">From</label>
+                <select {...register('fromMonth')} className="w-1/2 p-2 border rounded">
+                  <option value="">Month</option>
+                  {months.map(month => <option key={month.value} value={month.value}>{month.label}</option>)}
+                </select>
+                <select {...register('fromYear')} className="w-1/2 p-2 border rounded">
+                  <option value="">Year</option>
+                  {years.map(year => <option key={year.value} value={year.value}>{year.label}</option>)}
+                </select>
+              </div>
+              <div className="flex space-x-2">
+                <label className="block mb-1 w-10">To</label>
+                <select {...register('toMonth')} className="w-1/2 p-2 border rounded">
+                  <option value="">Month</option>
+                  {months.map(month => <option key={month.value} value={month.value}>{month.label}</option>)}
+                </select>
+                <select {...register('toYear')} className="w-1/2 p-2 border rounded">
+                  <option value="">Year</option>
+                  {years.map(year => <option key={year.value} value={year.value}>{year.label}</option>)}
+                </select>
+              </div>
             </div>
           </div>
 
           <div>
-            <label className="block mb-1">Telephone Number *</label>
+            <label className="block mb-1">Corporate Contact *</label>
             <div className="flex">
               <span className="p-2 bg-gray-200 border rounded-l">+233</span>
               <input
-                {...register('phoneNumber', {
+                {...register('corporateNumber', {
                   required: 'This field is required',
                   pattern: { value: /^\d{9}$/, message: 'Please enter exactly 9 digits after +233' }
                 })}
@@ -136,7 +182,24 @@ const RequestForm = () => {
                 placeholder="123456789"
               />
             </div>
-            {errors.phoneNumber && <span className="text-red-500 text-sm">{errors.phoneNumber.message}</span>}
+            {errors.corporateNumber && <span className="text-red-500 text-sm">{errors.corporateNumber.message}</span>}
+          </div>
+
+          <div>
+            <label className="block mb-1">Personal Contact</label>
+            <div className="flex">
+              <span className="p-2 bg-gray-200 border rounded-l">+233</span>
+              <input
+                {...register('personalNumber', {
+                  
+                  pattern: { value: /^\d{9}$/, message: 'Please enter exactly 9 digits after +233' }
+                })}
+                maxLength={9}
+                className="w-full p-2 border rounded-r"
+                placeholder="123456789"
+              />
+            </div>
+            {errors.personalNumber && <span className="text-red-500 text-sm">{errors.personalNumber.message}</span>}
           </div>
 
           <button type="submit" className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
@@ -159,8 +222,11 @@ const RequestForm = () => {
               <p><strong>Department:</strong> {formData.department}</p>
               <p><strong>Document Title:</strong> {formData.documentTitle}</p>
               <p><strong>Document Reference:</strong> {formData.documentReference || 'N/A'}</p>
-              <p><strong>File Date:</strong> {formData.fileMonth}/{formData.fileYear}</p>
-              <p><strong>Telephone Number:</strong> +233{formData.phoneNumber}</p>
+              <p><strong>Document Type:</strong> {formData.documentType}</p>
+              <p><strong>From</strong> {formData.fromDate}</p>
+              <p><strong>To</strong> {formData.toDate}</p>
+              <p><strong>Corporate Number:</strong> +233{formData.corporateNumber}</p>
+              <p><strong>Personal Number:</strong> +233{formData.personalNumber}</p>
             </div>
             <button 
                 onClick={confirmSubmit} 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaUserCircle } from 'react-icons/fa';
@@ -7,10 +7,12 @@ import NotificationBell from '../components/NotificationBell';
 import axios from 'axios';
 
 const Navbar = () => {
-    const { isAuthenticated, logout, username, token, fetchRequests } = useAuth();
+    const { isAuthenticated, logout, username, token, } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-
+    const dropdownRef = useRef(null);
+    const bellRef = useRef(null);
+    const adminButtonRef = useRef(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [hasShadow, setHasShadow] = useState(false);
@@ -18,12 +20,15 @@ const Navbar = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+
+
     useEffect(() => {
         const fetchNotifications = async () => {
             if (!isAuthenticated) return; // Only fetch if authenticated
             setLoading(true); // Start loading
             try {
-                const response = await axios.get('http://localhost:5000/api/notifications/all', {
+                const response = await axios.get('http://localhost:5000/api/notifications/unread', {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 if (Array.isArray(response.data.data)) {
@@ -54,21 +59,21 @@ const Navbar = () => {
     return () => clearInterval(timer);
   }, []);
 
-useEffect(() => {
-  const handleClickOutside = (event) => {
-    const dropdown = document.getElementById('user-dropdown'); 
-    const adminButton = document.getElementById('admin-button'); 
-    if (dropdown && !dropdown.contains(event.target) && adminButton && !adminButton.contains(event.target)) {
-      setDropdownOpen(false);
-    }
-  };
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+        if (
+            dropdownRef.current && !dropdownRef.current.contains(event.target) &&
+            bellRef.current && !bellRef.current.contains(event.target) &&
+            adminButtonRef.current && !adminButtonRef.current.contains(event.target)
+        ) {
+            setDropdownOpen(false);
+            setNotifDropdownOpen(false); // Close notification dropdown as well
+        }
+    };
 
-  document.addEventListener('mousedown', handleClickOutside);
-  return () => {
-    document.removeEventListener('mousedown', handleClickOutside);
-  };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
 }, []);
-
 
   // Add shadow on scroll
   useEffect(() => {
@@ -94,6 +99,7 @@ useEffect(() => {
                 <div className="flex justify-between items-center h-16">
                     {/* Left Side - Logo and Links */}
                     <div className="flex items-center space-x-8">
+                    
                         <Link to="/">
                             <img src={logo} alt="GNPC Logo" className="h-20" />
                         </Link>
@@ -117,28 +123,36 @@ useEffect(() => {
                         {isAuthenticated ? (
                             <div className="flex items-center space-x-4 cursor-pointer">     
                                 {/* Notification Bell - Show count of pending requests */}
+                                <div ref={bellRef}>
                                 <NotificationBell 
                                     notificationCount={notifications.filter(n => !n.isRead).length} 
                                     notifications={notifications} 
                                     setNotifications={setNotifications}
+                                    isOpen={notifDropdownOpen}
+                                    setIsOpen={setNotifDropdownOpen}
                                 />
+                                </div>
 
                                 {/* User Dropdown */}
-                                <div className="relative">
-                                    <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setDropdownOpen(!dropdownOpen)} id="admin-button">
-                                        <FaUserCircle size={24} />
-                                        <span>{username || 'Admin'}</span>
+                                <div className="relative" ref={dropdownRef}>
+                                <div 
+                                    className="flex items-center space-x-2 cursor-pointer" 
+                                    onClick={() => setDropdownOpen(!dropdownOpen)} 
+                                    ref={adminButtonRef}
+                                >
+                                    <FaUserCircle size={24} />
+                                    <span>{username || 'Admin'}</span>
+                                </div>
+                                {dropdownOpen && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-md shadow-lg z-50">
+                                    <Link to="/admin/new-user" className="block px-4 py-2 hover:bg-gray-100">
+                                        Add New User
+                                    </Link>
+                                    <button onClick={handleLogout} className="block w-full text-left px-4 py-2 hover:bg-gray-100">
+                                        Logout
+                                    </button>
                                     </div>
-                                    {dropdownOpen && (
-                                        <div id="user-dropdown" className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-md shadow-lg z-50">
-                                            <Link to="/admin/new-user" className="block px-4 py-2 hover:bg-gray-100">
-                                                Add New User
-                                            </Link>
-                                            <button onClick={handleLogout} className="block w-full text-left px-4 py-2 hover:bg-gray-100">
-                                                Logout
-                                            </button>
-                                        </div>
-                                    )}
+                                )}
                                 </div>
                             </div>
                         ) : (

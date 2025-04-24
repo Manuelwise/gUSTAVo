@@ -43,19 +43,27 @@ const RequestModalAudit = ({ requestId, onClose }) => {
                 <h2 className="text-xl font-bold mb-4">Request Details</h2>
                 <div className="space-y-3 text-sm">
                     <p><strong>Requesting Officer:</strong> {requestDetails.officerName}</p>
+                    <p><strong>Email:</strong> {requestDetails.email}</p>
                     <p><strong>Department:</strong> {requestDetails.department}</p>
                     <p><strong>Supervisor Name:</strong> {requestDetails.supervisorName}</p>
                     <p><strong>Document Title:</strong> {requestDetails.documentTitle}</p>
                     <p><strong>File Reference:</strong> {requestDetails.documentReference}</p>
-                    <p><strong>File Date:</strong> {requestDetails.fileDate ? format(new Date(requestDetails.fileDate), 'dd MMM yyyy') : 'N/A'}</p>
-                    <p><strong>Purpose of Request:</strong> {requestDetails.purpose}</p>
-                    <p><strong>Telephone:</strong> +233{requestDetails.phoneNumber}</p>
-                    <p><strong>Date of Request:</strong> {requestDetails.returnDate ? format(new Date(requestDetails.returnDate), 'dd MMM yyyy') : 'N/A'}</p>
+                    <p><strong>File Date Range:</strong></p>
+                    <p><strong>From:</strong> {format(new Date(requestDetails.fromDate), 'dd MMM yyyy')}</p>
+                    <p><strong>To:</strong> {format(new Date(requestDetails.toDate), 'dd MMM yyyy')}</p>
+                    <p><strong>Document Type:</strong> {requestDetails.documentType}</p>
+                    <p><strong>Corporate Contact:</strong> +233{requestDetails.corporateNumber}</p>
+                    <p><strong>Personal Contact:</strong> +233{requestDetails.personalNumber}</p>
+                    <p><strong>Date of Request:</strong> {requestDetails.requestDate ? format(new Date(requestDetails.requestDate), 'dd MMM yyyy') : 'N/A'}</p>
+                    <p><strong>Document Delivery Status:</strong> {requestDetails.deliveryStatus}</p>
+                    
                     <p>
                         <strong>Status:</strong>
                         <span className={`ml-2 px-2 py-1 rounded ${
                             requestDetails.status === 'approved' ? 'bg-green-100 text-green-800' :
                             requestDetails.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                            requestDetails.status === 'dispatched' ? 'bg-blue-100 text-blue-800' :
+                            requestDetails.status === 'returned' ? 'bg-purple-100 text-purple-800' :
                             'bg-yellow-100 text-yellow-800'
                         }`}>
                             {requestDetails.status}

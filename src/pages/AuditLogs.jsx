@@ -65,7 +65,7 @@ const AuditLogs = () => {
     }}
 >
       <div className="container mx-auto px-4 py-8">  
-           <h2 className="text-5xl text-white font-bold mb-4 text-center">Activity Logs for User {username}</h2>
+           <h2 className="text-5xl text-white font-bold mb-4 text-center">Activity Logs for Admin: {username}</h2>
            <div className="flex justify-between mb-4">
                <span></span> {/* Placeholder for alignment */}
                <Link
@@ -80,15 +80,15 @@ const AuditLogs = () => {
                    <thead className="bg-gray-100">
                        <tr>
                            <th className="px-4 py-2 text-left">Timestamp</th>
+                           <th className="px-4 py-2 text-left">Document Title</th>
                            <th className="px-4 py-2 text-left">Action</th>
-                           <th className="px-4 py-2 text-left">Details</th>
                        </tr>
                    </thead>
                    <tbody>
                        {currentLogs.map((log, index) => (
                            <tr key={index} className="border-b cursor-pointer" onClick={() => setSelectedRequest(log.requestId)}>
                                <td className="px-4 py-2">{new Date(log.createdAt).toLocaleString()}</td>
-                               <td className="px-4 py-2">{log.requestId}</td>
+                               <td className="px-4 py-2">{log.documentTitle}</td>
                                <td className="px-4 py-2">{log.action}</td>
                            </tr>
                        ))}
