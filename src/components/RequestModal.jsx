@@ -46,11 +46,18 @@ const RequestModal = ({ request, onClose }) => {
                         <span className={`ml-2 px-2 py-1 rounded ${
                             request.status === 'approved' ? 'bg-green-100 text-green-800' :
                             request.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                            request.status === 'dispatched' ? 'bg-blue-100 text-blue-800' :
-                            request.status === 'returned' ? 'bg-purple-100 text-purple-800' :
+                            request.completionStatus === 'dispatched' ? 'bg-blue-100 text-blue-800' :
+                            request.completionStatus === 'returned' ? 'bg-purple-100 text-purple-800' :
                             'bg-yellow-100 text-yellow-800'
                         }`}>
                             {request.status}
+                        </span>
+                        <span className={`ml-2 px-2 py-1 rounded ${
+                            request.completionStatus === 'dispatched' ? 'bg-blue-100 text-blue-800' :
+                            request.completionStatus === 'returned' ? 'bg-purple-100 text-purple-800' :
+                            ''
+                        }`}>
+                            {request.completionStatus}
                         </span>
                     </p>
                     <p><strong>Email:</strong> {request.email}</p>

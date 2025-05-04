@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { X } from 'lucide-react';
 
 const StatusChangeModal = ({ id, status, onSubmit, onClose }) => {

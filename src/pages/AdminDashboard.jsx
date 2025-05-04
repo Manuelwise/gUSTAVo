@@ -74,7 +74,7 @@ const AdminDashboard = () => {
         setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            await axios.patch(`http://localhost:5000/api/requests/returned/${id}`, { status: newStatus }, {
+            await axios.patch(`http://localhost:5000/api/requests/returned/${id}`, { completionStatus: newStatus }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -91,7 +91,7 @@ const AdminDashboard = () => {
         setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            await axios.patch(`http://localhost:5000/api/requests/dispatched/${id}`, { status: newStatus }, {
+            await axios.patch(`http://localhost:5000/api/requests/dispatched/${id}`, { completionStatus: newStatus }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -145,8 +145,8 @@ const AdminDashboard = () => {
                     { title: 'Pending Requests', value: requests.filter(r => r.status === 'pending').length, icon: Users },
                     { title: 'Approved', value: requests.filter(r => r.status === 'approved').length, icon: CheckCircle },
                     { title: 'Rejected', value: requests.filter(r => r.status === 'rejected').length, icon: XCircle },
-                    { title: 'Dispatched', value: requests.filter(r => r.status === 'dispatched').length, icon: Truck },
-                    { title: 'Returned', value: requests.filter(r => r.status === 'returned').length, icon: ArrowLeftCircle }
+                    { title: 'Dispatched', value: requests.filter(r => r.completionStatus === 'dispatched').length, icon: Truck },
+                    { title: 'Returned', value: requests.filter(r => r.completionStatus === 'returned').length, icon: ArrowLeftCircle }
                   ]}
                 />
             </div>
@@ -184,14 +184,15 @@ const AdminDashboard = () => {
                                         {index + 1}. {format(new Date(request.returnDate), 'dd MMMM, yyyy')}
                                     </span>
                                     <span className={`ml-2 px-2 py-1 rounded text-sm ${
-                                        request.status === 'approved' ? 'bg-green-100 text-green-800' :
-                                        request.status === 'dispatched' ? 'bg-blue-100 text-blue-800' :
-                                        request.status === 'returned' ? 'bg-purple-100 text-purple-800' :
-                                            request.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                                                'bg-yellow-100 text-yellow-800'
+                                        (request.completionStatus === 'dispatched') ? 'bg-blue-100 text-blue-800' :
+                                        (request.completionStatus === 'returned') ? 'bg-purple-100 text-purple-800' :
+                                        (request.status === 'approved') ? 'bg-green-100 text-green-800' :
+                                        (request.status === 'rejected') ? 'bg-red-100 text-red-800' :
+                                        'bg-yellow-100 text-yellow-800'
                                     }`}>
-                                        {request.status}
+                                        {request.completionStatus || request.status}
                                     </span>
+
                                     <div className="mt-2">
                                         <p>Officer: {request.officerName}</p>
                                         <p>Supervisor: {request.supervisorName}</p>
@@ -200,7 +201,7 @@ const AdminDashboard = () => {
                                 </div>
 
                                 <select
-                                    value={request.status}
+                                    value={request.completionStatus || request.status}
                                     onClick={(e) => e.stopPropagation()}
                                     onChange={(e) => {
                                         const selectedValue = e.target.value;

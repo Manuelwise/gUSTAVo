@@ -68,6 +68,13 @@ const RequestModalAudit = ({ requestId, onClose }) => {
                         }`}>
                             {requestDetails.status}
                         </span>
+                        <span className={`ml-2 px-2 py-1 rounded ${
+                            requestDetails.completionStatus === 'dispatched' ? 'bg-blue-100 text-blue-800' :
+                            requestDetails.completionStatus === 'returned' ? 'bg-purple-100 text-purple-800' :
+                            'bg-yellow-100 text-yellow-800'
+                        }`}>
+                            {requestDetails.completionStatus}
+                        </span>
                     </p>
                     <p><strong>Email:</strong> {requestDetails.email}</p>
                 </div>

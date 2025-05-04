@@ -106,7 +106,7 @@ const NewUserAdmin = () => {
                         )}
                     </div>
 
-                    <div>
+                    {/* <div>
                         <label className="block mb-1">Role *</label>
                         <select
                             {...register('role', { required: 'This field is required' })}
@@ -119,7 +119,7 @@ const NewUserAdmin = () => {
                         {errors.role && (
                             <span className="text-red-500 text-sm">{errors.role.message}</span>
                         )}
-                    </div>
+                    </div> */}
 
                     <button
                         type="submit"

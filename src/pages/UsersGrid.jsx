@@ -56,6 +56,7 @@ const UsersGrid = () => {
                 <h2 className="text-2xl font-bold mb-4">Admins</h2>
                 <div className="mb-4">
                     <span className="text-gray-100 mb-4">Search for an admin by username</span>
+                    <br />
                     <span className="text-gray-100 mb-4">Track the activities of the admins</span>
                 </div>
                 <input
