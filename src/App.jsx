@@ -7,7 +7,10 @@ import HomePage from './pages/HomePage';
 import RequestForm from './pages/RequestForm';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+<<<<<<< HEAD
 import UserDashboard from './pages/UserDashboard';
+=======
+>>>>>>> b56182316c66f8bac9af551575b1b95d19810da6
 import ThankYou from './pages/utils/ThankYou';
 import ProtectedRoute from './components/ProtectedRoute';
 import NewUserAdmin from './pages/NewUserAdmin';
@@ -32,11 +35,16 @@ const App = () => {
               <Route
                 path="/admin/dashboard"
                 element={
+<<<<<<< HEAD
                   <ProtectedRoute requiredRole="Admin">
+=======
+                  <ProtectedRoute>
+>>>>>>> b56182316c66f8bac9af551575b1b95d19810da6
                     <AdminDashboard />
                   </ProtectedRoute>
                 }
               />
+<<<<<<< HEAD
               <Route
                 path="/user/dashboard"
                 element={
@@ -73,6 +81,33 @@ const App = () => {
                   </ProtectedRoute>
                 } 
               />
+=======
+              <Route path="/admin/audit-logs" 
+      element={
+        <ProtectedRoute>
+            <AuditLogs />
+        </ProtectedRoute>
+          } 
+           />
+              <Route path="/admin/new-user" 
+              element={
+                <ProtectedRoute>
+                  <NewUserAdmin />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/reports" 
+              element={
+                <ProtectedRoute>
+                  <Reports />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/users" 
+              element={
+                <ProtectedRoute>
+                  <UsersGrid />
+                </ProtectedRoute>
+              } />
+>>>>>>> b56182316c66f8bac9af551575b1b95d19810da6
             </Routes>
           </main>
           <Footer />

@@ -24,7 +24,13 @@ const AdminDashboard = () => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [showStatusModal, setShowStatusModal] = useState(false);
+<<<<<<< HEAD
     const [pendingStatusChange, setPendingStatusChange] = useState(null);
+=======
+    const [pendingStatusChange, setPendingStatusChange] = useState(null); // { id, newStatus }
+    
+
+>>>>>>> b56182316c66f8bac9af551575b1b95d19810da6
 
     const fetchRequests = async () => {
         const token = localStorage.getItem('token');
@@ -49,6 +55,7 @@ const AdminDashboard = () => {
     const handleStatusModalSubmit = async ({ id, status, additionalInfo, reasonForRejection }) => {
         setIsLoading(true);
         try {
+<<<<<<< HEAD
             const token = localStorage.getItem('token');
             await axios.patch(
                 `http://localhost:5000/api/requests/${id}`,
@@ -59,6 +66,36 @@ const AdminDashboard = () => {
             );
 
             setAlert({ type: 'success', message: `Status updated to ${status}` });
+=======
+          const token = localStorage.getItem('token');
+          await axios.patch(
+            `http://localhost:5000/api/requests/${id}`,
+            { status, additionalInfo, reasonForRejection },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+      
+          setAlert({ type: 'success', message: `Status updated to ${status}` });
+          fetchRequests();
+        } catch (error) {
+          setAlert({ type: 'error', message: 'Failed to update status' });
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+
+    const statusReturned = async (id, newStatus) => {
+        setIsLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            await axios.patch(`http://localhost:5000/api/requests/returned/${id}`, { completionStatus: newStatus }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            setAlert({ type: 'success', message: `Status updated to ${newStatus}` });
+>>>>>>> b56182316c66f8bac9af551575b1b95d19810da6
             fetchRequests();
         } catch (error) {
             setAlert({ type: 'error', message: 'Failed to update status' });
@@ -67,6 +104,26 @@ const AdminDashboard = () => {
         }
     };
 
+<<<<<<< HEAD
+=======
+    const statusDispatched = async (id, newStatus) => {
+        setIsLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            await axios.patch(`http://localhost:5000/api/requests/dispatched/${id}`, { completionStatus: newStatus }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            setAlert({ type: 'success', message: `Status updated to ${newStatus}` });
+            fetchRequests();    
+        } catch (error) {
+            setAlert({ type: 'error', message: 'Failed to update status' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+>>>>>>> b56182316c66f8bac9af551575b1b95d19810da6
     const ITEMS_PER_PAGE = 3;
 
     const filteredRequests = requests.filter(request => {
@@ -85,6 +142,7 @@ const AdminDashboard = () => {
 
     const paginatedRequests = filteredRequests.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
+<<<<<<< HEAD
     // Function to get appropriate dropdown options based on request status
     const getDropdownOptions = (request) => {
         // Admin should only see Approve/Reject for pending requests
@@ -228,3 +286,133 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+=======
+    return (
+        <div
+        className="bg-cover bg-center"
+        style={{
+            backgroundImage: `url(${featureImage})`,
+            backgroundSize: 'cover', // Ensures the whole image fits inside the div
+            backgroundPosition: 'center', // Centers the image within the div
+            backgroundRepeat: 'no-repeat', // Prevents tiling if the image is smaller than the div
+            opacity: 0.9,
+            // height: '    calc(100vh - 100px)', // Adjust this value based on your navbar and footer height
+        }}
+    >
+        <div className="container mx-auto px-4 py-8">
+            {alert && <Alert type={alert.type} message={alert.message} onClose={() => setAlert(null)} />}
+
+            <div className="mb-8">
+                <h2 className="text-4xl font-bold mb-6">DoRS Dashboard</h2>
+                <DashboardStats
+                 stats={[
+                    { title: 'Total Requests', value: requests.length, icon: FileText, link: '/admin/reports' },
+                    { title: 'Pending Requests', value: requests.filter(r => r.status === 'pending').length, icon: Users },
+                    { title: 'Approved', value: requests.filter(r => r.status === 'approved').length, icon: CheckCircle },
+                    { title: 'Rejected', value: requests.filter(r => r.status === 'rejected').length, icon: XCircle },
+                    { title: 'Dispatched', value: requests.filter(r => r.completionStatus === 'dispatched').length, icon: Truck },
+                    { title: 'Returned', value: requests.filter(r => r.completionStatus === 'returned').length, icon: ArrowLeftCircle }
+                  ]}
+                />
+            </div>
+
+            <div className="mb-4">
+                <Link to="/admin/users" className="bg-yellow-400 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    View Audit Logs
+                </Link>
+            </div>
+
+            <div className="bg-white rounded-lg shadow p-6">
+                <div className="space-y-4 mb-6">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-bold">File Access Requests</h2>
+                        <SearchBar onSearch={setSearchTerm} />
+                    </div>
+                    <DateRangeFilter
+                        startDate={startDate}
+                        endDate={endDate}
+                        onStartDateChange={setStartDate}
+                        onEndDateChange={setEndDate}
+                    />
+                </div>
+
+                {isLoading ? <LoadingSpinner /> : (
+                    <div className="flex flex-col space-y-4">
+                        {paginatedRequests.map((request, index) => (
+                            <div
+                                key={request._id}
+                                className="border p-4 rounded-lg hover:bg-gray-100 transition duration-300 ease-in-out transform hover:scale-105 flex justify-between items-center cursor-pointer"
+                                onClick={() => setSelectedRequest(request)}
+                            >
+                                <div className="flex-1">
+                                    <span className="font-bold">
+                                        {index + 1}. {format(new Date(request.returnDate), 'dd MMMM, yyyy')}
+                                    </span>
+                                    <span className={`ml-2 px-2 py-1 rounded text-sm ${
+                                        (request.completionStatus === 'dispatched') ? 'bg-blue-100 text-blue-800' :
+                                        (request.completionStatus === 'returned') ? 'bg-purple-100 text-purple-800' :
+                                        (request.status === 'approved') ? 'bg-green-100 text-green-800' :
+                                        (request.status === 'rejected') ? 'bg-red-100 text-red-800' :
+                                        'bg-yellow-100 text-yellow-800'
+                                    }`}>
+                                        {request.completionStatus || request.status}
+                                    </span>
+
+                                    <div className="mt-2">
+                                        <p>Officer: {request.officerName}</p>
+                                        <p>Supervisor: {request.supervisorName}</p>
+                                        <p>Email: {request.email}</p>
+                                    </div>
+                                </div>
+
+                                <select
+                                    value={request.completionStatus || request.status}
+                                    onClick={(e) => e.stopPropagation()}
+                                    onChange={(e) => {
+                                        const selectedValue = e.target.value;
+                                    
+                                        if (selectedValue === 'approved' || selectedValue === 'rejected') {
+                                            setPendingStatusChange({ id: request._id, newStatus: selectedValue });
+                                            setShowStatusModal(true);
+                                        } else if (selectedValue === 'returned') {
+                                            statusReturned(request._id, selectedValue);
+                                        } else if (selectedValue === 'dispatched') {
+                                            statusDispatched(request._id, selectedValue);
+                                        } else {
+                                            handleStatusChange(request._id, selectedValue);
+                                        }
+                                    }}                                    
+                                    className="p-2 border rounded"
+                                >
+                                    <option value="requested">Request</option>
+                                    <option value="approved">Approve</option>
+                                    <option value="rejected">Reject</option>
+                                    <option value="dispatched">Dispatch</option>
+                                    <option value="returned">Return</option>
+                                </select>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                <Pagination currentPage={currentPage} totalPages={Math.ceil(filteredRequests.length / ITEMS_PER_PAGE)} onPageChange={setCurrentPage} />
+            </div>
+
+            {selectedRequest && (
+                <RequestModal request={selectedRequest} onClose={() => setSelectedRequest(null)} />
+            )}
+            {showStatusModal && pendingStatusChange && (
+            <StatusChangeModal
+                id={pendingStatusChange.id}
+                status={pendingStatusChange.newStatus}
+                onSubmit={handleStatusModalSubmit}
+                onClose={() => setShowStatusModal(false)}
+            />
+            )}  
+        </div>
+    </div>
+    );
+};
+
+export default AdminDashboard;
+>>>>>>> b56182316c66f8bac9af551575b1b95d19810da6

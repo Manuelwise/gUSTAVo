@@ -1,11 +1,16 @@
+<<<<<<< HEAD
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import axios from 'axios';
+=======
+import React, { createContext, useContext, useState } from 'react';
+>>>>>>> b56182316c66f8bac9af551575b1b95d19810da6
 
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
     const [userId, setUserId] = useState(null);
     const [username, setUsername] = useState(null);
+<<<<<<< HEAD
     const [approvedRequests, setApprovedRequests] = useState([]);
     const [userProcessingRequests, setUserProcessingRequests] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -213,6 +218,11 @@ export const UserProvider = ({ children }) => {
             updateProcessingStatus,
             refreshData
         }}>
+=======
+
+    return (
+        <UserContext.Provider value={{ userId, setUserId, username, setUsername }}>
+>>>>>>> b56182316c66f8bac9af551575b1b95d19810da6
             {children}
         </UserContext.Provider>
     );

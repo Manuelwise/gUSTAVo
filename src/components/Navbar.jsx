@@ -157,7 +157,11 @@ const Navbar = () => {
                             </div>
                         ) : (
                             <Link to="/admin/login" className="bg-white text-yellow-600 px-4 py-2 rounded hover:bg-yellow-100">
+<<<<<<< HEAD
                                 Login
+=======
+                                Admin Login
+>>>>>>> b56182316c66f8bac9af551575b1b95d19810da6
                             </Link>
                         )}
                     </div>
